@@ -1,68 +1,178 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Green - Generador OpEx</title>
+<title>Green · OpEx Tollgate Builder</title>
 <style>
-  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; max-width: 780px; margin: 40px auto; padding: 0 16px; color: #1a1a1a; }
-  h1 { font-size: 22px; }
-  .step { background: #f6f7f9; border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
-  input, textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 13px; }
-  textarea { min-height: 260px; }
-  button { background: #0969da; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 14px; cursor: pointer; margin-top: 10px; }
-  button:disabled { background: #999; cursor: not-allowed; }
-  #status { margin-top: 14px; font-size: 14px; white-space: pre-line; }
-  .ok { color: #1a7f37; font-weight: 600; }
-  .err { color: #cf222e; font-weight: 600; }
-  a.download { display: inline-block; margin-top: 10px; background: #1a7f37; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; }
-  small { color: #57606a; }
+  :root {
+    --gm-blue: #0170CE;
+    --gm-blue-dark: #00397D;
+    --ink: #14181f;
+    --paper: #ffffff;
+    --mist: #f4f6f9;
+    --line: #dde3ea;
+    --ok: #1a7f37;
+    --err: #c0261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+    background: var(--mist);
+    color: var(--ink);
+    margin: 0;
+    padding: 32px 16px 60px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--gm-blue), var(--gm-blue-dark));
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 18px; letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+  h1 { font-size: 22px; margin: 0; font-weight: 700; color: var(--ink); }
+  .subtitle { font-size: 13px; color: #5b6472; margin-top: 2px; }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 1px 2px rgba(20,24,31,0.04);
+  }
+
+  label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--ink); }
+  textarea, input {
+    width: 100%; box-sizing: border-box;
+    padding: 12px; border: 1px solid var(--line); border-radius: 8px;
+    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12.5px;
+    background: var(--mist);
+  }
+  textarea { min-height: 300px; resize: vertical; line-height: 1.5; }
+  textarea:focus, input:focus { outline: 2px solid var(--gm-blue); outline-offset: 1px; background: white; }
+
+  .filename-row { margin-top: 16px; }
+  .filename-row input { font-family: inherit; }
+
+  button.primary {
+    width: 100%;
+    background: var(--gm-blue);
+    color: white; border: none;
+    padding: 14px 18px; border-radius: 9px;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer; margin-top: 18px;
+    transition: background 0.15s ease;
+  }
+  button.primary:hover { background: var(--gm-blue-dark); }
+  button.primary:disabled { background: #a9b2bd; cursor: not-allowed; }
+
+  #status {
+    margin-top: 16px; font-size: 13.5px; line-height: 1.5;
+    display: none;
+  }
+  #status.show { display: block; }
+  #status.ok { color: var(--ok); }
+  #status.err { color: var(--err); }
+  #status.pending { color: #5b6472; }
+
+  a.download {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 10px; background: var(--ok); color: white;
+    padding: 11px 18px; border-radius: 8px; text-decoration: none;
+    font-weight: 700; font-size: 14px;
+  }
+
+  details.settings {
+    margin-top: 18px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  details.settings summary {
+    cursor: pointer; font-size: 12.5px; color: #5b6472; font-weight: 600;
+    list-style: none; display: flex; align-items: center; gap: 6px;
+  }
+  details.settings summary::-webkit-details-marker { display: none; }
+  details.settings[open] summary { color: var(--ink); }
+  .settings-body { margin-top: 12px; }
+  .settings-body label { font-size: 12px; margin-top: 10px; }
+  .settings-body input { font-size: 12px; }
+  .hint { font-size: 11.5px; color: #8590a0; margin-top: 5px; }
+
+  footer { text-align: center; margin-top: 22px; font-size: 11.5px; color: #9aa3af; }
 </style>
 </head>
 <body>
-  <h1>Green · Generador de presentaciones OpEx/DMAIC</h1>
-  <p><small>Pega el JSON que te dio el agente de Glean, da clic en "Crear presentación" y espera ~1 minuto.</small></p>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">G</div>
+      <div>
+        <h1>Green · OpEx Tollgate Builder</h1>
+        <div class="subtitle">GM Fundición de Aluminio · Toluca</div>
+      </div>
+    </div>
+  </header>
 
-  <div class="step">
-    <label>Repositorio (owner/repo)</label>
-    <input id="repo" placeholder="ej. Fer-GMFundicion/green-opex">
-    <label style="margin-top:10px">Token de GitHub (Personal Access Token, permiso "repo" + "workflow")</label>
-    <input id="token" type="password" placeholder="ghp_...">
-    <small>El token se guarda solo en este navegador (localStorage), nunca se envía a otro lado más que a la API de GitHub.</small>
-  </div>
-
-  <div class="step">
-    <label>JSON del proyecto</label>
+  <div class="card">
+    <label for="json">Pega aquí el JSON del agente de Glean</label>
     <textarea id="json" placeholder='{ "project_title": "...", "define": { ... }, ... }'></textarea>
-    <label style="margin-top:10px">Nombre del archivo de salida</label>
-    <input id="filename" placeholder="Proyecto_14980_OpEx">
-    <button id="go">Crear presentación</button>
+
+    <div class="filename-row">
+      <label for="filename">Nombre del archivo</label>
+      <input id="filename" placeholder="Proyecto_14980_OpEx">
+    </div>
+
+    <button id="go" class="primary">Generar presentación</button>
     <div id="status"></div>
+
+    <details class="settings">
+      <summary>⚙ Configuración (solo la primera vez, en esta computadora)</summary>
+      <div class="settings-body">
+        <label for="repo">Repositorio (owner/repo)</label>
+        <input id="repo" value="Ferchan08/green-opex">
+        <label for="token">Token de GitHub</label>
+        <input id="token" type="password" placeholder="github_pat_...">
+        <div class="hint">El token se guarda solo en este navegador (nunca se sube al repo ni se comparte). Necesita permisos Contents + Actions (Read and write) sobre el repo.</div>
+      </div>
+    </details>
   </div>
+
+  <footer>Green Builder · genera presentaciones desde el template OpEx/DMAIC oficial</footer>
+</div>
 
 <script>
 const $ = (id) => document.getElementById(id);
 
-$('repo').value = localStorage.getItem('green_repo') || '';
+$('repo').value = localStorage.getItem('green_repo') || 'Ferchan08/green-opex';
 $('token').value = localStorage.getItem('green_token') || '';
+
+function setStatus(text, cls) {
+  const el = $('status');
+  el.className = 'show ' + (cls || '');
+  el.innerHTML = text;
+}
 
 $('go').addEventListener('click', async () => {
   const repo = $('repo').value.trim();
   const token = $('token').value.trim();
   const jsonText = $('json').value.trim();
   const filename = ($('filename').value.trim() || 'Presentacion_OpEx').replace(/[^a-zA-Z0-9_\-]/g, '_');
-  const status = $('status');
-  status.className = ''; status.textContent = '';
 
-  if (!repo || !token || !jsonText) {
-    status.className = 'err';
-    status.textContent = 'Falta repositorio, token o JSON.';
+  if (!repo || !token) {
+    setStatus('Abre "⚙ Configuración" y pon tu token de GitHub (solo se hace una vez en esta compu).', 'err');
+    return;
+  }
+  if (!jsonText) {
+    setStatus('Pega el JSON del proyecto primero.', 'err');
     return;
   }
   try { JSON.parse(jsonText); } catch (e) {
-    status.className = 'err';
-    status.textContent = 'El JSON no es válido: ' + e.message;
+    setStatus('El JSON no es válido: ' + e.message, 'err');
     return;
   }
 
@@ -70,7 +180,7 @@ $('go').addEventListener('click', async () => {
   localStorage.setItem('green_token', token);
 
   $('go').disabled = true;
-  status.textContent = 'Disparando el workflow en GitHub Actions...';
+  setStatus('Disparando la generación en GitHub Actions...', 'pending');
 
   const headers = {
     'Authorization': `Bearer ${token}`,
@@ -87,12 +197,11 @@ $('go').addEventListener('click', async () => {
       body: JSON.stringify({ ref: 'main', inputs: { project_json: jsonText, project_title: filename } })
     });
     if (!dispatchResp.ok) {
-      throw new Error(`No se pudo disparar el workflow (HTTP ${dispatchResp.status}). Revisa repo/token.`);
+      throw new Error(`No se pudo disparar el workflow (HTTP ${dispatchResp.status}). Revisa el repositorio/token en Configuración.`);
     }
 
-    status.textContent = 'Workflow disparado. Buscando la ejecución...';
+    setStatus('Workflow disparado. Buscando la ejecución...', 'pending');
 
-    // Poll: buscar la run que arrancó justo después de nuestro dispatch
     let runId = null;
     for (let i = 0; i < 15 && !runId; i++) {
       await new Promise(r => setTimeout(r, 3000));
@@ -100,55 +209,44 @@ $('go').addEventListener('click', async () => {
       const runsData = await runsResp.json();
       const candidate = (runsData.workflow_runs || []).find(r => r.created_at >= beforeDispatch);
       if (candidate) runId = candidate.id;
-      status.textContent = `Buscando la ejecución... (intento ${i + 1})`;
+      setStatus(`Buscando la ejecución... (intento ${i + 1})`, 'pending');
     }
     if (!runId) throw new Error('No se encontró la ejecución. Revisa la pestaña Actions del repo manualmente.');
 
-    status.textContent = `Ejecución #${runId} encontrada. Esperando a que termine...`;
+    setStatus(`Ejecución encontrada. Generando la presentación...`, 'pending');
 
     let run = null;
     for (let i = 0; i < 40; i++) {
       await new Promise(r => setTimeout(r, 4000));
       const runResp = await fetch(`https://api.github.com/repos/${repo}/actions/runs/${runId}`, { headers });
       run = await runResp.json();
-      status.textContent = `Estado: ${run.status} (${run.conclusion || 'en progreso'})...`;
+      setStatus(`Generando la presentación... (${run.status})`, 'pending');
       if (run.status === 'completed') break;
     }
 
     if (!run || run.status !== 'completed') {
-      throw new Error('El workflow tardó demasiado. Revísalo en la pestaña Actions del repo.');
+      throw new Error('El proceso tardó demasiado. Revísalo en la pestaña Actions del repo.');
     }
     if (run.conclusion !== 'success') {
-      throw new Error(`El workflow terminó con estado "${run.conclusion}". Revisa los logs en Actions.`);
+      throw new Error(`El proceso terminó con errores (estado: ${run.conclusion}). Revisa los logs en Actions.`);
     }
 
-    // Buscar el Release publicado por este run
     const relResp = await fetch(`https://api.github.com/repos/${repo}/releases/tags/run-${run.run_number}`, { headers });
-    if (!relResp.ok) throw new Error('El workflow terminó bien pero no encontré el Release. Revisa la pestaña Releases.');
+    if (!relResp.ok) throw new Error('Se generó bien pero no encontré el archivo. Revisa la pestaña Releases del repo.');
     const release = await relResp.json();
     const asset = (release.assets || [])[0];
-    if (!asset) throw new Error('El Release no tiene archivo adjunto.');
+    if (!asset) throw new Error('El resultado no tiene archivo adjunto.');
 
-    status.textContent = 'Descargando archivo...';
-    // Se descarga vía la API (con auth) para que funcione aunque el repo sea privado.
-    const assetResp = await fetch(asset.url, {
-      headers: { ...headers, 'Accept': 'application/octet-stream' }
-    });
-    const blob = await assetResp.blob();
-    const blobUrl = URL.createObjectURL(blob);
-
-    status.className = 'ok';
-    status.innerHTML = '¡Listo! ';
+    setStatus('✅ ¡Presentación lista!', 'ok');
     const link = document.createElement('a');
     link.className = 'download';
-    link.href = blobUrl;
-    link.download = asset.name;
-    link.textContent = `Descargar ${asset.name}`;
-    status.appendChild(link);
+    link.href = asset.browser_download_url;
+    link.target = '_blank';
+    link.textContent = `⬇ Descargar ${asset.name}`;
+    $('status').appendChild(link);
 
   } catch (err) {
-    status.className = 'err';
-    status.textContent = 'Error: ' + err.message;
+    setStatus('Error: ' + err.message, 'err');
   } finally {
     $('go').disabled = false;
   }
