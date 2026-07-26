@@ -1,0 +1,59 @@
+name: Generar presentación OpEx
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_json:
+        description: "JSON del proyecto (pegado desde el agente de Glean)"
+        required: true
+        type: string
+      project_title:
+        description: "Nombre corto para el archivo de salida (sin espacios raros)"
+        required: false
+        default: "Presentacion_OpEx"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install python-pptx
+
+      - name: Guardar JSON recibido
+        run: |
+          cat > project.json <<'EOF'
+          ${{ inputs.project_json }}
+          EOF
+          python -m json.tool project.json > /dev/null
+
+      - name: Generar presentación
+        run: |
+          mkdir -p output
+          python generate_pptx.py project.json "output/${{ inputs.project_title }}.pptx"
+
+      - name: Subir como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: presentacion-opex
+          path: output/*.pptx
+          retention-days: 30
+
+      - name: Publicar como Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: run-${{ github.run_number }}
+          name: "${{ inputs.project_title }} (run #${{ github.run_number }})"
+          files: output/*.pptx
+          body: "Generado automáticamente desde el JSON pegado en la wizard page."
