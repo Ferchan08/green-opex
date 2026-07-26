@@ -1,0 +1,115 @@
+{
+  "project_title": "Project #14762: Power Bi - GBS Q&T Management Process Improvement",
+  "define": {
+    "problem_statement": "During 2025 at GBS Silao, the Quality and Transformation area required the management of information for each automated project using a lot of time, 60 hours per year. An area of opportunity was observed in the process for the consolidation of the information of the projects developed and the generation of statistical reports. Also, the team was investing in this process $100K USD annually due to projects loss of information.",
+    "objective_bullets": [
+      "Establish a standard and optimized process for managing team projects and enable project benefits.",
+      "Create an automated tool (Power Bi) that consolidates information and generate reports on automated projects.",
+      "Time reductions of 80% (48 hours), associated with project upload and reporting.",
+      "Enable Cost Avoidance of 100% ($100k USD annually)"
+    ],
+    "benefit_bullets": [
+      "Time optimization of 80% in this activity (48 annual hours).",
+      "Cost avoidance of 100% ($100k USD annually)",
+      "Decrease probability of errors",
+      "Just 1 Power BI file per report",
+      "Formal way of presenting",
+      "The Power BI is automatic",
+      "Just one revision with the team"
+    ],
+    "glossary_text": "JE: Journal Entry, an accountable document posted in ledger.\nCost center: Numerical distinction for a certain engineering group.\nEntity: GMM site.\nWD: Working day\nQ&T: Quality and Transformation\nGBS: Global Business Solutions\nCICP: Continuous Improvement Culture Program",
+    "project_leader": "David Iturriaga",
+    "sponsor": "Nancy Dominguez",
+    "team_members": "Oscar Marquez",
+    "opex_master": "Jennifer Chew / Oscar Tamariz",
+    "financial_approver": "Catalina Castillo",
+    "start_date": "10-feb-25",
+    "end_date": "25-jul-25",
+    "executive_champion": "Lizbeth Pérez",
+    "business_unit_approver": "Jorge Plata"
+  },
+  "intangible_benefits": {
+    "process_steps": ["Internal request process", "Consolidate Information", "Generate Reports"],
+    "actual_values": [3, 1, 1, 12, 60],
+    "optimized_values": [0.8, 0, 0.2, 12, 12],
+    "before_list": [
+      "Waste of time in manual processing",
+      "Risk of mistakes",
+      "Many platforms used",
+      "Not so formal way of presenting",
+      "Many revisions with the team"
+    ],
+    "after_list": [
+      "Reduction of 80% of the duration of the activity.",
+      "Decrease probability of errors",
+      "Just 1 Power BI file per report",
+      "More practical to use",
+      "Formal way of presenting",
+      "The Power BI will be automatic",
+      "Just one revision with the team"
+    ],
+    "annual_saving_text": "Annual saving hours of 48 hours (80%)",
+    "confirmation_note": "Benefits confirmed with two pilots completed in May and June 2025. 80% of time improvement achieved. Benefits will keep being monitored during Sustain phase and final benefit will be updated"
+  },
+  "tangible_benefits": {
+    "cost_per_lost_project": 10000,
+    "lost_projects_current": 10,
+    "lost_projects_optimized": 0,
+    "summary_lines": [
+      "Annual cost avoidance of $100,000 USD (100%)",
+      "First year cost avoidance (from May to December 2025 = ($8,333 USD x 8 months ) = ~$67k USD"
+    ],
+    "projected_note": "Projected cost avoidance is $100K USD year over year ($8,333 USD monthly). Projected 3 years savings is $0.267M USD ($267K USD) starting May 2025 to December 2027"
+  },
+  "implementation_plan": [
+    {"action": "Sharepoint", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "100%", "phase": "Improve", "comments": "..."},
+    {"action": "Consolidated File", "responsible": "(Leader/ Team Member)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Improve", "comments": ""},
+    {"action": "Power Bi", "responsible": "(Leader/ Team Member)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Improve", "comments": ""},
+    {"action": "Excel Tables", "responsible": "(Leader / Co-Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Improve", "comments": ""},
+    {"action": "Future Process Map", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Improve", "comments": ""},
+    {"action": "Solutions Evidence & Pilots", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Improve", "comments": ""},
+    {"action": "Benefits Confirmation", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Improve", "comments": ""},
+    {"action": "Control Plan", "responsible": "(Leader / Co-Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Control", "comments": ""},
+    {"action": "Monitoring Plan", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Control", "comments": ""},
+    {"action": "Standards and Procedures Developed and In Place", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Control", "comments": ""},
+    {"action": "Replication Opportunities Analysis", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Control", "comments": ""},
+    {"action": "Process Improvements Monitoring (More Pilots)", "responsible": "(Leader)", "start_date": "MM/DD/YYYY", "completion_date": "MM/DD/YYYY", "status": "0%", "phase": "Sustain", "comments": ""}
+  ],
+  "solutions_evidence": {
+    "process_name": "Internal Request Process",
+    "before_text": "An Excel form had to be filled out with each project criteria.",
+    "after_text": "A system was created in SharePoint with standard criteria, more friendly and easy to use, eliminating manual errors.",
+    "pilot_note_1": "Sharepoint Improvements were validated during May and June 2025. A total of two pilots implemented",
+    "pilot_note_2": "Power Bi Improvements were validated during May and June 2025. A total of two pilots implemented",
+    "generate_reports_label": "Generate Reports"
+  },
+  "control_plan": [
+    {"x": "X1: Document and consolidate the information in Sharepoint.", "target": "X1 <= 48 mnts Monthly", "method": "Capture the time that take the process to fill data in SharePoint.", "action": "Measure the time that takes to capture, create and visualized the information of project.", "frequency": "Monthly", "responsible": "Saul Marquez / David Garcia", "start_date": "May 2025", "reaction_plan": "Communicate and provide feedback if X1 > 48 minutes; planned action items: verify automatic information displays correctly, check notification is sent, confirm root causes and implement action plans."},
+    {"x": "X2: Update reports in Power Bi", "target": "X2 <= 12 mnts Monthly", "method": "Capture the time that take the process to visualized dashboard at Power BI automation tool.", "action": "Measure the time it takes to create the report to verify that it is within the determined range.", "frequency": "Monthly", "responsible": "David Garcia / Saul Marquez", "start_date": "May 2025", "reaction_plan": "Communicate and provide feedback if X2 > 12 minutes; planned action items: verify SharePoint/Power BI connection, review Teams hosting and scheduled refresh, confirm root causes."},
+    {"x": "X3: Cost Optimization Monitoring", "target": "X3 = $0 USD", "method": "Capture the cost per lost project per month", "action": "Measure the cost it takes per lost project", "frequency": "Monthly", "responsible": "David Garcia / Saul Marquez", "start_date": "May 2025", "reaction_plan": "Communicate and provide feedback if X3 > $0 USD; confirm action plans implemented, process adopted, finance data accurate."},
+    {"x": "X4: Implement Future Process Map", "target": "Make sure Future State Map is followed as defined", "method": "Follow Future State Map and evaluate it during pilots", "action": "Implement Future State Map activities into improved process and validate it during pilot runs", "frequency": "Monthly", "responsible": "David Garcia / Saul Marquez", "start_date": "May 2025", "reaction_plan": "Communicate and agree any changes needed in Future process map to the team and explain why updates are needed."}
+  ],
+  "monitoring_plan": {
+    "metric1_target": "X1 <= 48 mnts Monthly",
+    "metric1_values": [48, 44, 40, 41, 43],
+    "metric2_target": "X2 <= 12 mnts Monthly",
+    "metric2_values": [11, 11, 12, 10, 11],
+    "year_label": "2025"
+  },
+  "tollgate": {
+    "date_approved": "25-jul-25",
+    "checklist": [
+      {"criteria": "Standard Tool", "yn": "Y", "comments": "Power Bi"},
+      {"criteria": "Access Control", "yn": "Y", "comments": "Data Stage Power BI"},
+      {"criteria": "Automated Feed*", "yn": "N", "comments": "Power Bi linked to sharepoint automatic"},
+      {"criteria": "User & Back Up // Admin & Tool Maintenance Backup", "yn": "Y", "comments": "David Iturriaga & Saul Marquez // Oscar Marquez"},
+      {"criteria": "Documented SOP", "yn": "Y", "comments": "GMM Controllership - New - All Documents (sharepoint.com)"},
+      {"criteria": "Hosted on Server*", "yn": "Y", "comments": "Data Stage Power BI"},
+      {"criteria": "Training", "yn": "N", "comments": "David Iturriaga, Saul Marquez, Oscar Marquez, Nancy Dominguez, Edgar Ramirez & Alejandro Alcantara"}
+    ],
+    "comments_conclusion": [
+      "Elimination of manual steps. Processes automation to consolidate data from txt files and create Power Bi visualizations to monitoring and control customs operation on monthly basis.",
+      "Opportunity to increase project scope as per business requirement according to necessities to monitoring."
+    ]
+  }
+}

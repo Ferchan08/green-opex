@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Green - Generador OpEx</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; max-width: 780px; margin: 40px auto; padding: 0 16px; color: #1a1a1a; }
+  h1 { font-size: 22px; }
+  .step { background: #f6f7f9; border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+  input, textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 13px; }
+  textarea { min-height: 260px; }
+  button { background: #0969da; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 14px; cursor: pointer; margin-top: 10px; }
+  button:disabled { background: #999; cursor: not-allowed; }
+  #status { margin-top: 14px; font-size: 14px; white-space: pre-line; }
+  .ok { color: #1a7f37; font-weight: 600; }
+  .err { color: #cf222e; font-weight: 600; }
+  a.download { display: inline-block; margin-top: 10px; background: #1a7f37; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; }
+  small { color: #57606a; }
+</style>
+</head>
+<body>
+  <h1>Green · Generador de presentaciones OpEx/DMAIC</h1>
+  <p><small>Pega el JSON que te dio el agente de Glean, da clic en "Crear presentación" y espera ~1 minuto.</small></p>
+
+  <div class="step">
+    <label>Repositorio (owner/repo)</label>
+    <input id="repo" placeholder="ej. Fer-GMFundicion/green-opex">
+    <label style="margin-top:10px">Token de GitHub (Personal Access Token, permiso "repo" + "workflow")</label>
+    <input id="token" type="password" placeholder="ghp_...">
+    <small>El token se guarda solo en este navegador (localStorage), nunca se envía a otro lado más que a la API de GitHub.</small>
+  </div>
+
+  <div class="step">
+    <label>JSON del proyecto</label>
+    <textarea id="json" placeholder='{ "project_title": "...", "define": { ... }, ... }'></textarea>
+    <label style="margin-top:10px">Nombre del archivo de salida</label>
+    <input id="filename" placeholder="Proyecto_14980_OpEx">
+    <button id="go">Crear presentación</button>
+    <div id="status"></div>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+$('repo').value = localStorage.getItem('green_repo') || '';
+$('token').value = localStorage.getItem('green_token') || '';
+
+$('go').addEventListener('click', async () => {
+  const repo = $('repo').value.trim();
+  const token = $('token').value.trim();
+  const jsonText = $('json').value.trim();
+  const filename = ($('filename').value.trim() || 'Presentacion_OpEx').replace(/[^a-zA-Z0-9_\-]/g, '_');
+  const status = $('status');
+  status.className = ''; status.textContent = '';
+
+  if (!repo || !token || !jsonText) {
+    status.className = 'err';
+    status.textContent = 'Falta repositorio, token o JSON.';
+    return;
+  }
+  try { JSON.parse(jsonText); } catch (e) {
+    status.className = 'err';
+    status.textContent = 'El JSON no es válido: ' + e.message;
+    return;
+  }
+
+  localStorage.setItem('green_repo', repo);
+  localStorage.setItem('green_token', token);
+
+  $('go').disabled = true;
+  status.textContent = 'Disparando el workflow en GitHub Actions...';
+
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    const beforeDispatch = new Date().toISOString();
+
+    const dispatchResp = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/generate.yml/dispatches`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ ref: 'main', inputs: { project_json: jsonText, project_title: filename } })
+    });
+    if (!dispatchResp.ok) {
+      throw new Error(`No se pudo disparar el workflow (HTTP ${dispatchResp.status}). Revisa repo/token.`);
+    }
+
+    status.textContent = 'Workflow disparado. Buscando la ejecución...';
+
+    // Poll: buscar la run que arrancó justo después de nuestro dispatch
+    let runId = null;
+    for (let i = 0; i < 15 && !runId; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      const runsResp = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/generate.yml/runs?event=workflow_dispatch&per_page=5`, { headers });
+      const runsData = await runsResp.json();
+      const candidate = (runsData.workflow_runs || []).find(r => r.created_at >= beforeDispatch);
+      if (candidate) runId = candidate.id;
+      status.textContent = `Buscando la ejecución... (intento ${i + 1})`;
+    }
+    if (!runId) throw new Error('No se encontró la ejecución. Revisa la pestaña Actions del repo manualmente.');
+
+    status.textContent = `Ejecución #${runId} encontrada. Esperando a que termine...`;
+
+    let run = null;
+    for (let i = 0; i < 40; i++) {
+      await new Promise(r => setTimeout(r, 4000));
+      const runResp = await fetch(`https://api.github.com/repos/${repo}/actions/runs/${runId}`, { headers });
+      run = await runResp.json();
+      status.textContent = `Estado: ${run.status} (${run.conclusion || 'en progreso'})...`;
+      if (run.status === 'completed') break;
+    }
+
+    if (!run || run.status !== 'completed') {
+      throw new Error('El workflow tardó demasiado. Revísalo en la pestaña Actions del repo.');
+    }
+    if (run.conclusion !== 'success') {
+      throw new Error(`El workflow terminó con estado "${run.conclusion}". Revisa los logs en Actions.`);
+    }
+
+    // Buscar el Release publicado por este run
+    const relResp = await fetch(`https://api.github.com/repos/${repo}/releases/tags/run-${run.run_number}`, { headers });
+    if (!relResp.ok) throw new Error('El workflow terminó bien pero no encontré el Release. Revisa la pestaña Releases.');
+    const release = await relResp.json();
+    const asset = (release.assets || [])[0];
+    if (!asset) throw new Error('El Release no tiene archivo adjunto.');
+
+    status.textContent = 'Descargando archivo...';
+    // Se descarga vía la API (con auth) para que funcione aunque el repo sea privado.
+    const assetResp = await fetch(asset.url, {
+      headers: { ...headers, 'Accept': 'application/octet-stream' }
+    });
+    const blob = await assetResp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    status.className = 'ok';
+    status.innerHTML = '¡Listo! ';
+    const link = document.createElement('a');
+    link.className = 'download';
+    link.href = blobUrl;
+    link.download = asset.name;
+    link.textContent = `Descargar ${asset.name}`;
+    status.appendChild(link);
+
+  } catch (err) {
+    status.className = 'err';
+    status.textContent = 'Error: ' + err.message;
+  } finally {
+    $('go').disabled = false;
+  }
+});
+</script>
+</body>
+</html>
