@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 from pptx import Presentation
+from pptx.oxml.ns import qn
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATE_PATH = ROOT / "Simplicity_Template_OpEx_DA_2026.pptx"
@@ -184,13 +185,17 @@ def fill_slide2(slide, d):
     ib = d.get("intangible_benefits", {})
     table = shape_by_id(slide, 33).table
 
-    steps = ib.get("process_steps", ["Internal request process", "Consolidate Information", "Generate Reports"])
+    def pad(lst, length, fill=""):
+        lst = list(lst) if lst else []
+        return (lst + [fill] * length)[:length]
+
+    steps = pad(ib.get("process_steps"), 3, "")
     fill_table_row(table, 2, [steps[0], "", steps[1], "", steps[2], "", "Months per year", "", "Annual hours worked"])
     fill_table_row(table, 8, [steps[0], "", steps[1], "", steps[2], "", "Months per year", "", "Annual hours worked"])
 
-    av = ib.get("actual_values", [0, 0, 0, 12, 0])
+    av = pad(ib.get("actual_values"), 5, 0)
     fill_table_row(table, 4, [av[0], "+", av[1], "+", av[2], "x", av[3], "=", av[4]])
-    ov = ib.get("optimized_values", [0, 0, 0, 12, 0])
+    ov = pad(ib.get("optimized_values"), 5, 0)
     fill_table_row(table, 9, [ov[0], "+", ov[1], "+", ov[2], "x", ov[3], "=", ov[4]])
 
     if ib.get("before_list"):
@@ -228,11 +233,23 @@ def replace_free_list(shape, items):
         parent.append(new_p)
 
 
+def to_number(value, default=0):
+    """Convierte a numero de forma segura (el agente a veces manda '48' en
+    vez de 48, o texto vacio); si no se puede, regresa el default."""
+    if isinstance(value, (int, float)):
+        return value
+    try:
+        cleaned = str(value).replace(",", "").replace("$", "").replace("%", "").strip()
+        return float(cleaned) if cleaned else default
+    except (ValueError, TypeError):
+        return default
+
+
 def fill_slide3(slide, d):
     tb = d.get("tangible_benefits", {})
-    cost = tb.get("cost_per_lost_project", 0)
-    lost_current = tb.get("lost_projects_current", 0)
-    lost_opt = tb.get("lost_projects_optimized", 0)
+    cost = to_number(tb.get("cost_per_lost_project", 0))
+    lost_current = to_number(tb.get("lost_projects_current", 0))
+    lost_opt = to_number(tb.get("lost_projects_optimized", 0))
     total_current = cost * lost_current
     total_opt = cost * lost_opt
 
@@ -271,6 +288,40 @@ def fill_slide4(slide, d):
             ])
         else:
             fill_table_row(table, row_idx, [str(i + 1), "", "", "", "", "", "", ""])
+
+
+def replace_picture(shape, image_path):
+    """Sustituye la imagen de un shape tipo Picture, conservando su posicion
+    y tamano originales en la slide."""
+    slide_part = shape.part
+    image_part, rId = slide_part.get_or_add_image_part(str(image_path))
+    for blip in shape._element.findall(".//" + qn("a:blip")):
+        blip.set(qn("r:embed"), rId)
+
+
+# slide 5: mapa de "slot logico" -> shape_id de la imagen de evidencia
+IMAGE_SLOTS_SLIDE5 = {
+    "before1": 3,
+    "after1": 10,
+    "before2": 4,
+    "after2": 5,
+}
+
+
+def fill_slide5_images(slide, d):
+    images = d.get("images", {})
+    for slot, shape_id in IMAGE_SLOTS_SLIDE5.items():
+        rel_path = images.get(slot)
+        if not rel_path:
+            continue
+        img_path = ROOT / rel_path
+        if not img_path.exists():
+            print(f"AVISO: no se encontro la imagen {img_path}, se deja la original")
+            continue
+        try:
+            replace_picture(shape_by_id(slide, shape_id), img_path)
+        except Exception as e:
+            print(f"AVISO: no se pudo reemplazar imagen '{slot}': {e}")
 
 
 def fill_slide5(slide, d):
@@ -373,18 +424,32 @@ def build(data, output_path):
     prs = Presentation(str(TEMPLATE_PATH))
     slides = list(prs.slides)
 
-    fill_slide1(slides[0], data)
-    fill_slide2(slides[1], data)
-    fill_slide3(slides[2], data)
-    fill_slide4(slides[3], data)
-    fill_slide5(slides[4], data)
-    fill_slide6(slides[5], data)
-    fill_slide7(slides[6], data)
-    fill_slide8(slides[7], data)
+    steps = [
+        ("slide 1 (Define)", fill_slide1, slides[0]),
+        ("slide 2 (Intangible Benefits)", fill_slide2, slides[1]),
+        ("slide 3 (Tangible Benefits)", fill_slide3, slides[2]),
+        ("slide 4 (Implementation Plan)", fill_slide4, slides[3]),
+        ("slide 5 (Solutions Evidence)", fill_slide5, slides[4]),
+        ("slide 5 (imagenes)", fill_slide5_images, slides[4]),
+        ("slide 6 (Control Plan)", fill_slide6, slides[5]),
+        ("slide 7 (Monitoring Plan)", fill_slide7, slides[6]),
+        ("slide 8 (Tollgate)", fill_slide8, slides[7]),
+    ]
+    errors = []
+    for label, fn, slide in steps:
+        try:
+            fn(slide, data)
+        except Exception as e:
+            errors.append(f"{label}: {type(e).__name__}: {e}")
+            print(f"AVISO: fallo en {label}, se deja el contenido original de esa parte. Detalle: {e}")
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(output_path))
     print(f"OK -> {output_path}")
+    if errors:
+        print("\nATENCION: estas partes no se pudieron llenar (revisa el JSON):")
+        for e in errors:
+            print(f"  - {e}")
 
 
 if __name__ == "__main__":
